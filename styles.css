@@ -46,6 +46,16 @@ button:hover {
   background-color: #333;
 }
 
+#revealListBtn {
+  display: none;
+  margin-top: 20px;
+  background-color: #007bff;
+}
+
+#revealListBtn:hover {
+  background-color: #0056b3;
+}
+
 #cardDisplay {
   margin-top: 30px;
 }
@@ -60,6 +70,29 @@ button:hover {
   transform: scale(1.05);
 }
 
+.grayed-out {
+  filter: grayscale(100%) brightness(0.7);
+}
+
+.card-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 30px;
+  gap: 20px;
+}
+
+.card-with-lives {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lives {
+  margin-top: 8px;
+  font-weight: bold;
+}
+
 .number {
   font-size: 4rem;
   font-weight: bold;
@@ -71,29 +104,45 @@ button:hover {
   font-size: 1.1rem;
 }
 
-.card-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 20px;
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .card-img {
+    width: 140px;
+  }
+
+  .number {
+    font-size: 3rem;
+  }
 }
 
-.card-with-lives {
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s ease;
+@media (max-width: 768px) {
+  .card-img {
+    width: 120px;
+  }
+
+  button,
+  input[type=range] {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+
+  .number {
+    font-size: 2.5rem;
+  }
 }
 
-.card-with-lives img.grayed-out {
-  filter: grayscale(100%) brightness(0.7);
-}
+@media (max-width: 480px) {
+  .card-img {
+    width: 100px;
+  }
 
-.card-with-lives:hover {
-  transform: scale(1.05);
-}
+  button,
+  input[type=range] {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
 
-.lives {
-  margin-top: 5px;
-  font-weight: bold;
+  .number {
+    font-size: 2rem;
+  }
 }

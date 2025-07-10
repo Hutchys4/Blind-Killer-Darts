@@ -1,4 +1,3 @@
-// Map number to card label and filename suffix
 const numberToLabel = {
   1: "ace",
   2: "two",
@@ -12,7 +11,6 @@ const numberToLabel = {
   10: "ten"
 };
 
-// Build deck for spade cards with local image paths
 function getDeck(max) {
   const deck = [];
   for (let i = 1; i <= max; i++) {
@@ -20,7 +18,8 @@ function getDeck(max) {
     deck.push({
       n: i,
       name: label.charAt(0).toUpperCase() + label.slice(1) + " of Spades",
-      img: `assets/cards/spade/spade_${label}.png`
+      img: `assets/cards/spade/spade_${label}.png`,
+      lives: 3
     });
   }
   return deck;
@@ -28,24 +27,32 @@ function getDeck(max) {
 
 let remaining = [], used = [], drawCount = 0;
 let sliderLocked = false;
-const selectedCards = [];
+let cardListContainer;
+let maxSelected = 10;
 
 function updateRange(value) {
   const endCard = numberToLabel[value];
+  maxSelected = parseInt(value);
   document.getElementById("rangeLabel").innerHTML = 
     `Showing cards from <strong>Ace (1)</strong> to <strong>${endCard.charAt(0).toUpperCase() + endCard.slice(1)}</strong> of Spades`;
 }
 
 function resetDeck() {
   const max = parseInt(document.getElementById("rangeSelect").value);
+  maxSelected = max;
   remaining = getDeck(max);
   used = [];
   drawCount = 0;
   updateDrawCount();
   updateRange(max);
   document.getElementById("cardDisplay").innerHTML = '';
-  selectedCards.length = 0;
-  renderSelectedCards();
+
+  const existingList = document.getElementById("cardList");
+  if (existingList) {
+    existingList.remove();
+  }
+
+  document.getElementById("revealListBtn").style.display = "none";
 }
 
 function showRandomCard() {
@@ -56,8 +63,7 @@ function showRandomCard() {
   }
 
   if (remaining.length === 0) {
-    alert("All cards drawn. Resetting deck.");
-    resetDeck();
+    alert("All cards drawn.");
     return;
   }
 
@@ -73,12 +79,17 @@ function showRandomCard() {
     <div>${card.name}</div>
   `;
 
-  addCardToList(card);
-
   clearTimeout(window.hideTimeout);
   window.hideTimeout = setTimeout(() => {
     document.getElementById("cardDisplay").innerHTML = '';
-  }, 5000);
+  }, 3000);
+
+  if (remaining.length === 0) {
+    setTimeout(() => {
+      document.getElementById("cardDisplay").innerHTML = '';
+      document.getElementById("revealListBtn").style.display = "inline-block";
+    }, 3100);
+  }
 }
 
 function updateDrawCount() {
@@ -92,47 +103,46 @@ function enableSlider() {
   resetDeck();
 }
 
-// Add selected card with 3 lives
-function addCardToList(card) {
-  const cardData = { ...card, lives: 3 };
-  selectedCards.push(cardData);
-  renderSelectedCards();
-}
+function showCardList() {
+  // Sort used cards by their numeric value (A=1, 2, 3...10)
+  const sortedCards = [...used].sort((a, b) => a.n - b.n);
 
-// Render selected cards list
-function renderSelectedCards() {
-  const container = document.getElementById("selectedCards");
-  container.innerHTML = "";
+  cardListContainer = document.createElement("div");
+  cardListContainer.id = "cardList";
+  cardListContainer.className = "card-list";
+  document.body.appendChild(cardListContainer);
 
-  selectedCards.forEach((card, index) => {
-    const cardDiv = document.createElement("div");
-    cardDiv.className = "card-with-lives";
+  sortedCards.forEach((card, index) => {
+    const cardElement = document.createElement("div");
+    cardElement.className = "card-with-lives";
+    cardElement.dataset.index = index;
 
-    const cardImg = document.createElement("img");
-    cardImg.src = card.img;
-    cardImg.alt = card.name;
-    cardImg.className = "card-img";
-    if (card.lives === 0) {
-      cardImg.classList.add("grayed-out");
-    }
+    const img = document.createElement("img");
+    img.src = card.img;
+    img.alt = card.name;
+    img.className = "card-img";
 
     const livesText = document.createElement("div");
     livesText.className = "lives";
-    livesText.textContent = `Lives: ${card.lives}`;
+    livesText.textContent = "Lives: " + card.lives;
 
-    cardDiv.appendChild(cardImg);
-    cardDiv.appendChild(livesText);
-    cardDiv.appendChild(document.createTextNode(card.name));
+    cardElement.appendChild(img);
+    cardElement.appendChild(livesText);
+    cardListContainer.appendChild(cardElement);
 
-    cardDiv.addEventListener("click", () => {
+    cardElement.addEventListener("click", () => {
       if (card.lives > 0) {
         card.lives--;
-        renderSelectedCards();
+        livesText.textContent = "Lives: " + card.lives;
+
+        if (card.lives === 0) {
+          img.classList.add("grayed-out");
+        }
       }
     });
-
-    container.appendChild(cardDiv);
   });
+
+  document.getElementById("revealListBtn").style.display = "none";
 }
 
 // Initialize on load
