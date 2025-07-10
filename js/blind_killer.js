@@ -78,7 +78,6 @@ function showRandomCard() {
 
   if (remaining.length === 0 || playerDraws >= maxSelected) {
     document.querySelector("button[onclick='showRandomCard()']").style.display = "none";
-    document.getElementById("allDrawnOverlay").classList.remove("hidden");
     return;
   }
 
@@ -98,6 +97,12 @@ function showRandomCard() {
   clearTimeout(window.hideTimeout);
   window.hideTimeout = setTimeout(() => {
     document.getElementById("cardDisplay").innerHTML = '';
+
+    // Final check if all cards are now drawn
+    if (playerDraws >= maxSelected || remaining.length === 0) {
+      document.querySelector("button[onclick='showRandomCard()']").style.display = "none";
+      document.getElementById("allDrawnOverlay").classList.remove("hidden");
+    }
   }, 3000);
 
   if (playerDraws === playerCount) {
@@ -108,12 +113,6 @@ function showRandomCard() {
       used.push(dummyCard);
       playerDraws++;
     }
-  }
-
-  // Final check if all cards are now drawn
-  if (playerDraws >= maxSelected || remaining.length === 0) {
-    document.querySelector("button[onclick='showRandomCard()']").style.display = "none";
-    document.getElementById("allDrawnOverlay").classList.remove("hidden");
   }
 }
 
@@ -211,6 +210,5 @@ document.getElementById("viewResultsBtn").addEventListener("click", () => {
 function goHome() {
   window.location.href = "../index.html";
 }
-
 
 resetDeck();
