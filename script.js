@@ -29,6 +29,8 @@ let remaining = [], used = [], drawCount = 0;
 let sliderLocked = false;
 let cardListContainer;
 let maxSelected = 10;
+let playerCount = 1;
+let playerDraws = 0;
 
 function updateRange(value) {
   const endCard = numberToLabel[value];
@@ -37,15 +39,25 @@ function updateRange(value) {
     `Showing cards from <strong>Ace (1)</strong> to <strong>${endCard.charAt(0).toUpperCase() + endCard.slice(1)}</strong> of Spades`;
 }
 
+function updatePlayers(value) {
+  playerCount = parseInt(value);
+  document.getElementById("playerLabel").innerHTML = `Number of players: <strong>${playerCount}</strong>`;
+}
+
 function resetDeck() {
   const max = parseInt(document.getElementById("rangeSelect").value);
   maxSelected = max;
   remaining = getDeck(max);
   used = [];
   drawCount = 0;
+  playerDraws = 0;
   updateDrawCount();
   updateRange(max);
+  updatePlayers(document.getElementById("playerSelect").value);
   document.getElementById("cardDisplay").innerHTML = '';
+
+  // Show Draw Card button again on reset
+  document.querySelector("button[onclick='showRandomCard()']").style.display = "inline-block";
 
   const existingList = document.getElementById("cardList");
   if (existingList) {
@@ -53,16 +65,19 @@ function resetDeck() {
   }
 
   document.getElementById("revealListBtn").style.display = "none";
+  document.getElementById("winnerOverlay").classList.add("hidden");
 }
+
 
 function showRandomCard() {
   if (!sliderLocked) {
     document.getElementById("rangeControls").style.display = "none";
+    document.getElementById("playerControls").style.display = "none";
     document.getElementById("resetBtn").style.display = "inline-block";
     sliderLocked = true;
   }
 
-  if (remaining.length === 0) {
+  if (remaining.length === 0 || playerDraws >= maxSelected) {
     alert("All cards drawn.");
     return;
   }
@@ -71,8 +86,10 @@ function showRandomCard() {
   const card = remaining.splice(idx, 1)[0];
   used.push(card);
   drawCount++;
+  playerDraws++;
   updateDrawCount();
 
+  // Show the card display (unchanged) ...
   document.getElementById('cardDisplay').innerHTML = `
     <div class="number">${card.n === 1 ? "A" : card.n}</div>
     <img class="card-img" src="${card.img}" alt="${card.name}">
@@ -84,7 +101,19 @@ function showRandomCard() {
     document.getElementById("cardDisplay").innerHTML = '';
   }, 3000);
 
-  if (remaining.length === 0) {
+  // **Hide Draw Card button if all cards are drawn or players have drawn max cards**
+  if (remaining.length === 0 || playerDraws >= maxSelected) {
+    document.querySelector("button[onclick='showRandomCard()']").style.display = "none";
+  }
+
+  if (playerDraws === playerCount) {
+    while (playerDraws < maxSelected && remaining.length > 0) {
+      const dummyIdx = Math.floor(Math.random() * remaining.length);
+      const dummyCard = remaining.splice(dummyIdx, 1)[0];
+      used.push(dummyCard);
+      playerDraws++;
+    }
+
     setTimeout(() => {
       document.getElementById("cardDisplay").innerHTML = '';
       document.getElementById("revealListBtn").style.display = "inline-block";
@@ -99,12 +128,31 @@ function updateDrawCount() {
 function enableSlider() {
   sliderLocked = false;
   document.getElementById("rangeControls").style.display = "block";
+  document.getElementById("playerControls").style.display = "block";
   document.getElementById("resetBtn").style.display = "none";
   resetDeck();
 }
 
+function getHeartIcons(lives) {
+  return "❤️".repeat(lives);
+}
+
+function checkForWinner() {
+  const aliveCards = used.filter(card => card.lives > 0);
+  if (aliveCards.length === 1) {
+    showWinner(aliveCards[0]);
+  }
+}
+
+function showWinner(card) {
+  const overlay = document.getElementById("winnerOverlay");
+  const msg = document.getElementById("winnerMessage");
+  const cardLabel = card.n === 1 ? "Ace" : card.n;
+  msg.textContent = `${cardLabel} of Spades is the winner! Would you like to play again?`;
+  overlay.classList.remove("hidden");
+}
+
 function showCardList() {
-  // Sort used cards by their numeric value (A=1, 2, 3...10)
   const sortedCards = [...used].sort((a, b) => a.n - b.n);
 
   cardListContainer = document.createElement("div");
@@ -122,22 +170,33 @@ function showCardList() {
     img.alt = card.name;
     img.className = "card-img";
 
+    const skullOverlay = document.createElement("div");
+    skullOverlay.className = "skull-overlay";
+    skullOverlay.style.display = "none";
+    skullOverlay.textContent = "💀";
+
     const livesText = document.createElement("div");
     livesText.className = "lives";
-    livesText.textContent = "Lives: " + card.lives;
+    livesText.textContent = getHeartIcons(card.lives);
 
     cardElement.appendChild(img);
+    cardElement.appendChild(skullOverlay);
     cardElement.appendChild(livesText);
     cardListContainer.appendChild(cardElement);
 
     cardElement.addEventListener("click", () => {
       if (card.lives > 0) {
         card.lives--;
-        livesText.textContent = "Lives: " + card.lives;
-
-        if (card.lives === 0) {
-          img.classList.add("grayed-out");
-        }
+        livesText.style.opacity = 0;
+        setTimeout(() => {
+          livesText.textContent = getHeartIcons(card.lives);
+          livesText.style.opacity = 1;
+          if (card.lives === 0) {
+            img.classList.add("grayed-out");
+            skullOverlay.style.display = "flex";
+            checkForWinner();
+          }
+        }, 200);
       }
     });
   });
@@ -145,5 +204,10 @@ function showCardList() {
   document.getElementById("revealListBtn").style.display = "none";
 }
 
-// Initialize on load
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  document.getElementById("winnerOverlay").classList.add("hidden");
+  enableSlider();
+});
+
+// Initialize game
 resetDeck();

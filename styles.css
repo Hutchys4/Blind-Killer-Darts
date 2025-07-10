@@ -64,6 +64,10 @@ button:hover {
   width: 180px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
+  position: relative;
+  background-color: #000000; /* matches body background gradient start */
+  padding: 3px;
+  border-radius: 12px;
 }
 
 .card-img:hover {
@@ -83,6 +87,7 @@ button:hover {
 }
 
 .card-with-lives {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -90,7 +95,9 @@ button:hover {
 
 .lives {
   margin-top: 8px;
-  font-weight: bold;
+  font-size: 1.5rem;
+  color: red;
+  transition: opacity 0.3s ease;
 }
 
 .number {
@@ -104,9 +111,64 @@ button:hover {
   font-size: 1.1rem;
 }
 
-/* Responsive Styles */
+.skull-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  color: rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+/* Overlay for winner */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-content {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 320px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.overlay-content h2 {
+  font-size: 1.8rem;
+  margin-bottom: 25px;
+  color: #c70039;
+}
+
+#playAgainBtn {
+  background-color: #c70039;
+  color: white;
+  font-size: 1.2rem;
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+#playAgainBtn:hover {
+  background-color: #900c3f;
+}
+
 @media (max-width: 1024px) {
-  .card-img {
+  .card-img, .skull-overlay {
     width: 140px;
   }
 
@@ -116,7 +178,7 @@ button:hover {
 }
 
 @media (max-width: 768px) {
-  .card-img {
+  .card-img, .skull-overlay {
     width: 120px;
   }
 
@@ -129,10 +191,18 @@ button:hover {
   .number {
     font-size: 2.5rem;
   }
+
+  .lives {
+    font-size: 1.2rem;
+  }
+
+  .skull-overlay {
+    font-size: 2.5rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .card-img {
+  .card-img, .skull-overlay {
     width: 100px;
   }
 
@@ -143,6 +213,14 @@ button:hover {
   }
 
   .number {
+    font-size: 2rem;
+  }
+
+  .lives {
+    font-size: 1rem;
+  }
+
+  .skull-overlay {
     font-size: 2rem;
   }
 }
