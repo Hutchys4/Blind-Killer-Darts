@@ -28,6 +28,7 @@ function getDeck(max) {
 
 let remaining = [], used = [], drawCount = 0;
 let sliderLocked = false;
+const selectedCards = [];
 
 function updateRange(value) {
   const endCard = numberToLabel[value];
@@ -43,6 +44,8 @@ function resetDeck() {
   updateDrawCount();
   updateRange(max);
   document.getElementById("cardDisplay").innerHTML = '';
+  selectedCards.length = 0;
+  renderSelectedCards();
 }
 
 function showRandomCard() {
@@ -70,6 +73,8 @@ function showRandomCard() {
     <div>${card.name}</div>
   `;
 
+  addCardToList(card);
+
   clearTimeout(window.hideTimeout);
   window.hideTimeout = setTimeout(() => {
     document.getElementById("cardDisplay").innerHTML = '';
@@ -87,5 +92,48 @@ function enableSlider() {
   resetDeck();
 }
 
-// Initialize deck on page load
+// Add selected card with 3 lives
+function addCardToList(card) {
+  const cardData = { ...card, lives: 3 };
+  selectedCards.push(cardData);
+  renderSelectedCards();
+}
+
+// Render selected cards list
+function renderSelectedCards() {
+  const container = document.getElementById("selectedCards");
+  container.innerHTML = "";
+
+  selectedCards.forEach((card, index) => {
+    const cardDiv = document.createElement("div");
+    cardDiv.className = "card-with-lives";
+
+    const cardImg = document.createElement("img");
+    cardImg.src = card.img;
+    cardImg.alt = card.name;
+    cardImg.className = "card-img";
+    if (card.lives === 0) {
+      cardImg.classList.add("grayed-out");
+    }
+
+    const livesText = document.createElement("div");
+    livesText.className = "lives";
+    livesText.textContent = `Lives: ${card.lives}`;
+
+    cardDiv.appendChild(cardImg);
+    cardDiv.appendChild(livesText);
+    cardDiv.appendChild(document.createTextNode(card.name));
+
+    cardDiv.addEventListener("click", () => {
+      if (card.lives > 0) {
+        card.lives--;
+        renderSelectedCards();
+      }
+    });
+
+    container.appendChild(cardDiv);
+  });
+}
+
+// Initialize on load
 resetDeck();

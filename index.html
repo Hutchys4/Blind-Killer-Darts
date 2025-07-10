@@ -9,14 +9,22 @@
 </head>
 <body>
   <h1>Blind Killer</h1>
+
   <div class="controls" id="rangeControls">
     <div id="rangeLabel">Showing cards from <strong>Ace (1)</strong> to <strong>Ten</strong> of Spades</div>
     <input type="range" id="rangeSelect" min="5" max="10" value="10" oninput="updateRange(this.value)" onchange="resetDeck()" />
   </div>
+
   <button onclick="showRandomCard()">Draw Card</button>
   <button id="resetBtn" onclick="enableSlider()">Reset</button>
+
   <div id="drawCount">Draws: 0</div>
   <div id="cardDisplay"></div>
+
+  <div id="selectedCardsContainer">
+    <h2>Selected Cards</h2>
+    <div id="selectedCards" class="card-list"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>

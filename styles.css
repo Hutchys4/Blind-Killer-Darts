@@ -70,3 +70,30 @@ button:hover {
   margin-top: 20px;
   font-size: 1.1rem;
 }
+
+.card-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.card-with-lives {
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.card-with-lives img.grayed-out {
+  filter: grayscale(100%) brightness(0.7);
+}
+
+.card-with-lives:hover {
+  transform: scale(1.05);
+}
+
+.lives {
+  margin-top: 5px;
+  font-weight: bold;
+}
