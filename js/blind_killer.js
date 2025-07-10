@@ -209,7 +209,7 @@ document.getElementById("viewResultsBtn").addEventListener("click", () => {
 });
 
 function goHome() {
-  window.location.href = "../index.html";
+  window.location.href = "index.html";
 }
 
 
