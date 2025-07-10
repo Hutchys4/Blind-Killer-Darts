@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blind Killer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>Blind Killer</h1>
+  <div class="controls" id="rangeControls">
+    <div id="rangeLabel">Showing cards from <strong>Ace (1)</strong> to <strong>Ten</strong> of Spades</div>
+    <input type="range" id="rangeSelect" min="5" max="10" value="10" oninput="updateRange(this.value)" onchange="resetDeck()" />
+  </div>
+  <button onclick="showRandomCard()">Draw Card</button>
+  <button id="resetBtn" onclick="enableSlider()">Reset</button>
+  <div id="drawCount">Draws: 0</div>
+  <div id="cardDisplay"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
