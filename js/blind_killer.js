@@ -18,7 +18,7 @@ function getDeck(max) {
     deck.push({
       n: i,
       name: label.charAt(0).toUpperCase() + label.slice(1) + " of Spades",
-      img: `assets/cards/spade/spade_${label}.png`,
+      img: `../assets/cards/spade/spade_${label}.png`,
       lives: 3
     });
   }
@@ -207,5 +207,10 @@ document.getElementById("viewResultsBtn").addEventListener("click", () => {
   document.getElementById("allDrawnOverlay").classList.add("hidden");
   showCardList();
 });
+
+function goHome() {
+  window.location.href = "../index.html";
+}
+
 
 resetDeck();
