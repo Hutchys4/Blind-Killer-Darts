@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blind Killer</title>
+  <link rel="stylesheet" href="css/blind_killer.css" />
+</head>
+<body>
+  <h1>Blind Killer</h1>
+
+  <div id="rangeControls" class="controls">
+    <label for="rangeSelect" id="rangeLabel">Showing cards from <strong>Ace (1)</strong> to <strong>Ten</strong> of Spades</label><br />
+    <input type="range" id="rangeSelect" min="5" max="10" value="10" oninput="updateRange(this.value)" onchange="resetDeck()">
+  </div>
+
+  <div id="playerControls" class="controls">
+    <label for="playerSelect" id="playerLabel">Number of players: <strong>1</strong></label><br />
+    <input type="range" id="playerSelect" min="1" max="10" value="1" oninput="updatePlayers(this.value)">
+  </div>
+
+  <div class="controls">
+    <button onclick="showRandomCard()">Draw Card</button>
+    <button id="revealListBtn" onclick="showCardList()">Reveal All Cards</button>
+    <button id="resetBtn" onclick="enableSlider()">Play Again</button>
+  </div>
+
+  <div id="drawCount">Draws: 0</div>
+  <div id="cardDisplay"></div>
+
+  <div id="winnerOverlay" class="overlay hidden">
+    <div class="overlay-content">
+      <h2 id="winnerMessage">Ace of Spades is the winner!</h2>
+      <button id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
+
+  <!-- All Cards Drawn Overlay -->
+<div id="allDrawnOverlay" class="overlay hidden">
+  <div class="overlay-content">
+    <h2>All Cards Drawn</h2>
+    <p>All cards have been drawn. Click below to view the results.</p>
+    <button id="viewResultsBtn">View Results</button>
+  </div>
+</div>
+
+<script src="js/blind_killer.js" defer></script>
+</body>
+</html>

@@ -33,9 +33,10 @@ let playerCount = 1;
 let playerDraws = 0;
 
 function updateRange(value) {
+  if (value < 5) value = 5;
   const endCard = numberToLabel[value];
   maxSelected = parseInt(value);
-  document.getElementById("rangeLabel").innerHTML = 
+  document.getElementById("rangeLabel").innerHTML =
     `Showing cards from <strong>Ace (1)</strong> to <strong>${endCard.charAt(0).toUpperCase() + endCard.slice(1)}</strong> of Spades`;
 }
 
@@ -46,17 +47,16 @@ function updatePlayers(value) {
 
 function resetDeck() {
   const max = parseInt(document.getElementById("rangeSelect").value);
-  maxSelected = max;
-  remaining = getDeck(max);
+  maxSelected = Math.max(5, max);
+  remaining = getDeck(maxSelected);
   used = [];
   drawCount = 0;
   playerDraws = 0;
   updateDrawCount();
-  updateRange(max);
+  updateRange(maxSelected);
   updatePlayers(document.getElementById("playerSelect").value);
   document.getElementById("cardDisplay").innerHTML = '';
 
-  // Show Draw Card button again on reset
   document.querySelector("button[onclick='showRandomCard()']").style.display = "inline-block";
 
   const existingList = document.getElementById("cardList");
@@ -64,10 +64,9 @@ function resetDeck() {
     existingList.remove();
   }
 
-  document.getElementById("revealListBtn").style.display = "none";
   document.getElementById("winnerOverlay").classList.add("hidden");
+  document.getElementById("allDrawnOverlay").classList.add("hidden");
 }
-
 
 function showRandomCard() {
   if (!sliderLocked) {
@@ -78,7 +77,8 @@ function showRandomCard() {
   }
 
   if (remaining.length === 0 || playerDraws >= maxSelected) {
-    alert("All cards drawn.");
+    document.querySelector("button[onclick='showRandomCard()']").style.display = "none";
+    document.getElementById("allDrawnOverlay").classList.remove("hidden");
     return;
   }
 
@@ -89,7 +89,6 @@ function showRandomCard() {
   playerDraws++;
   updateDrawCount();
 
-  // Show the card display (unchanged) ...
   document.getElementById('cardDisplay').innerHTML = `
     <div class="number">${card.n === 1 ? "A" : card.n}</div>
     <img class="card-img" src="${card.img}" alt="${card.name}">
@@ -101,23 +100,20 @@ function showRandomCard() {
     document.getElementById("cardDisplay").innerHTML = '';
   }, 3000);
 
-  // **Hide Draw Card button if all cards are drawn or players have drawn max cards**
-  if (remaining.length === 0 || playerDraws >= maxSelected) {
-    document.querySelector("button[onclick='showRandomCard()']").style.display = "none";
-  }
-
   if (playerDraws === playerCount) {
+    // Fill in dummy cards if needed
     while (playerDraws < maxSelected && remaining.length > 0) {
       const dummyIdx = Math.floor(Math.random() * remaining.length);
       const dummyCard = remaining.splice(dummyIdx, 1)[0];
       used.push(dummyCard);
       playerDraws++;
     }
+  }
 
-    setTimeout(() => {
-      document.getElementById("cardDisplay").innerHTML = '';
-      document.getElementById("revealListBtn").style.display = "inline-block";
-    }, 3100);
+  // Final check if all cards are now drawn
+  if (playerDraws >= maxSelected || remaining.length === 0) {
+    document.querySelector("button[onclick='showRandomCard()']").style.display = "none";
+    document.getElementById("allDrawnOverlay").classList.remove("hidden");
   }
 }
 
@@ -200,8 +196,6 @@ function showCardList() {
       }
     });
   });
-
-  document.getElementById("revealListBtn").style.display = "none";
 }
 
 document.getElementById("playAgainBtn").addEventListener("click", () => {
@@ -209,5 +203,9 @@ document.getElementById("playAgainBtn").addEventListener("click", () => {
   enableSlider();
 });
 
-// Initialize game
+document.getElementById("viewResultsBtn").addEventListener("click", () => {
+  document.getElementById("allDrawnOverlay").classList.add("hidden");
+  showCardList();
+});
+
 resetDeck();
