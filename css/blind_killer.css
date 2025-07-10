@@ -184,6 +184,12 @@ button:hover {
   background-color: #900c3f;
 }
 
+footer {
+  margin-top: 50px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
 @media (max-width: 1024px) {
   .card-img, .skull-overlay {
     width: 140px;
