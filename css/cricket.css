@@ -21,6 +21,16 @@ h1, h2 {
   color: #c70039;
 }
 
+.toggle-rule {
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.toggle-rule label {
+  margin-right: 0.5rem;
+  font-weight: bold;
+}
+
 .player-settings {
   margin-bottom: 2rem;
 }
@@ -75,6 +85,19 @@ button:disabled {
   font-size: 1.2rem;
   color: #c70039;
 }
+
+.score-column.current-player {
+  box-shadow: 0 0 15px 3px #838383;
+  border-color: #26b819;
+  background-color: #e6f7e8;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#endGame{
+  background-color: #575757;
+  box-shadow: 0 0 2px 2px #5a5a5a;
+}
+
 
 .hit-markers {
   display: grid;
