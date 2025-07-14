@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cricket 🎯</title>
+    <link rel="stylesheet" href="../css/cricket.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Cricket 🎯</h1>
+
+      <div class="player-settings">
+        <button id="startGame">Start Game</button>
+
+        <div id="spacing"></div>
+
+        <label id="playerCountLabel" for="playerCount"
+          >Number of Players:</label
+        >
+
+        <input type="range" id="playerCount" min="1" max="4" value="2" />
+        <span id="playerCountDisplay">2</span>
+
+        <button id="endGame" class="hidden">End Game</button>
+      </div>
+
+      <div id="currentTurn" class="hidden"></div>
+      <div id="scoreboard" class="hidden"></div>
+
+      <div id="controls" class="hidden">
+        <div id="numberButtons"></div>
+      </div>
+
+      <!-- End Game Confirmation Popup -->
+      <div id="endGamePopup" class="popup hidden">
+        <div class="popup-content">
+          <h3>End Game?</h3>
+          <p>This will reset everything and start over.</p>
+          <button id="confirmEndGame" style="margin-right: 1rem">Yes</button>
+          <button id="cancelEndGame">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Next Player Popup -->
+      <div id="nextPlayerPopup" class="popup hidden">
+        <div class="popup-content">
+          <h3>Turn Complete</h3>
+          <p>Next player's turn</p>
+          <button id="nextPlayerContinue">Continue</button>
+        </div>
+      </div>
+
+      <!-- Winner Popup -->
+      <div id="winnerPopup" class="popup hidden">
+        <div class="popup-content">
+          <h3>Game Over!</h3>
+          <p id="winnerName"></p>
+          <button id="closeWinnerPopup">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/cricket.js"></script>
+  </body>
+</html>

@@ -1,0 +1,179 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to right, #ffe6e6, #fff);
+  text-align: center;
+  color: #222;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+h1, h2 {
+  margin-bottom: 1rem;
+  color: #c70039;
+}
+
+.player-settings {
+  margin-bottom: 2rem;
+}
+
+input[type="range"] {
+  width: 200px;
+  margin-left: 10px;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #c70039;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover:enabled {
+  background-color: #900c3f;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+#scoreboard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.score-column {
+  background: #f7f7f7;
+  color: #222;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex: 1 1 250px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.score-column h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  color: #c70039;
+}
+
+.hit-markers {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-top: 10px;
+}
+
+.hit-cell {
+  padding: 0.5rem;
+  border-radius: 0.3rem;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  font-weight: bold;
+}
+
+.hit-cell.closed {
+  background-color: #16743d;
+  color: white;
+}
+
+#numberButtons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+#numberButtons button {
+  width: 60px;
+}
+
+@media (max-width: 768px) {
+  .score-column {
+    flex: 1 1 100%;
+  }
+
+  #numberButtons button {
+    width: 50px;
+    font-size: 0.9rem;
+  }
+
+  button,
+  input[type="range"] {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  #numberButtons button {
+    width: 40px;
+    font-size: 0.8rem;
+  }
+
+  button,
+  input[type="range"] {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}
+
+/* Popup styles */
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  max-width: 90%;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+.popup.hidden {
+  display: none;
+}
+
+#currentTurn{
+  margin-top: 20px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#spacing{
+  margin-bottom: 20px;
+}
