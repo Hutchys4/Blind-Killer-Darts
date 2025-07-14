@@ -91,6 +91,9 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.9);
+  animation: layDownCard 0.4s ease forwards;
 }
 
 .lives {
@@ -125,8 +128,11 @@ button:hover {
 /* Overlay for winner */
 .overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -187,6 +193,124 @@ footer {
   margin-top: 50px;
   font-size: 0.9rem;
   color: #555;
+}
+
+.confirm-box {
+  background: rgb(255, 255, 255);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 300px;
+}
+
+.confirm-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+
+.confirm-buttons button {
+  padding: 6px 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#spacing{
+  margin-bottom: 75px;
+}
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  user-select: none;
+  cursor: pointer;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.slider {
+  position: relative;
+  width: 50px;
+  height: 26px;
+  background-color: #d43e3e;
+  border-radius: 15px;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 22px;
+  width: 22px;
+  left: 2px;
+  top: 2px;
+  background-color: rgb(233, 231, 231);
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.switch input:checked + .slider {
+  background-color: #1b8a49; /* blue ON by default */
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(24px);
+}
+
+/* Label text styles */
+.label-text {
+  color: #000000;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+/* OFF state label */
+.switch input:not(:checked) ~ .label-text {
+  color: #000000;
+  content: "OFF";
+}
+
+/* ON label color for checked */
+.switch input:checked ~ .label-text {
+  color: #000000;
+}
+
+/* To change label text dynamically: */
+.switch input:not(:checked) ~ .label-text::before {
+  content: "Audio OFF";
+}
+
+.switch input:checked ~ .label-text::before {
+  content: "Audio ON ";
+  color: #000000;
+}
+
+/* Green ON variant (optional) */
+.switch.green input:checked + .slider {
+  background-color: #16743d;
+}
+
+
+@keyframes layDownCard {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (max-width: 1024px) {
