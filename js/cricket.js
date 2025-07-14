@@ -264,3 +264,7 @@ function showWinnerPopup(name) {
 
   winnerPopup.classList.remove("hidden");
 }
+
+function goHome() {
+  window.location.href = "../index.html";
+}

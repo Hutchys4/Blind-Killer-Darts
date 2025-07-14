@@ -52,6 +52,22 @@ button {
   transition: background 0.3s ease;
 }
 
+#homeBtn {
+  margin-top: 20px;
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+#homeBtn:hover {
+  background-color: #495057;
+}
+
 button:hover:enabled {
   background-color: #900c3f;
 }
