@@ -1,9 +1,11 @@
-const validNumbers = [20, 19, 18, 17, 16, 15, 50]; // 50 = bull
+const validNumbers = [20, 19, 18, 17, 16, 15, "B"]; // B = bull
 let players = [];
 let currentPlayerIndex = 0;
-let hitCountThisTurn = 0;
-const maxHitsPerTurn = 3;
+let dartsThrown = 0;
+const dartsPerTurn = 3;
 let instantWinMode = false;
+let selectedMultiplier = 1; // 1 = single, 2 = double, 3 = triple
+let turnHistory = []; // for undo: [{number, marks, points}]
 
 // DOM Elements
 const playerCountSlider = document.getElementById("playerCount");
@@ -16,6 +18,7 @@ const scoreboard = document.getElementById("scoreboard");
 const controls = document.getElementById("controls");
 const numberButtons = document.getElementById("numberButtons");
 const currentTurnDisplay = document.getElementById("currentTurn");
+const multiplierButtons = document.getElementById("multiplierButtons");
 
 // Popups
 const endGamePopup = document.getElementById("endGamePopup");
@@ -23,6 +26,7 @@ const confirmEndGameBtn = document.getElementById("confirmEndGame");
 const cancelEndGameBtn = document.getElementById("cancelEndGame");
 
 const nextPlayerPopup = document.getElementById("nextPlayerPopup");
+const nextPlayerMessage = document.getElementById("nextPlayerMessage");
 const nextPlayerContinueBtn = document.getElementById("nextPlayerContinue");
 
 const winnerPopup = document.getElementById("winnerPopup");
@@ -68,7 +72,6 @@ startGameBtn.addEventListener("click", () => {
   playerCountLabel.style.display = "none";
   winRuleToggle.parentElement.style.display = "none";
 
-  // hide name inputs on game start
   const nameIn = document.getElementById("nameInputs");
   nameIn.style.display = "none";
 
@@ -86,7 +89,8 @@ startGameBtn.addEventListener("click", () => {
   }
 
   currentPlayerIndex = 0;
-  hitCountThisTurn = 0;
+  dartsThrown = 0;
+  turnHistory = [];
   startGame();
 });
 
@@ -97,8 +101,7 @@ endGameBtn.addEventListener("click", () => {
 confirmEndGameBtn.addEventListener("click", () => {
   endGamePopup.classList.add("hidden");
   resetGame();
-  const nameIn = document.getElementById("nameInputs");
-  nameIn.style.display = "block";
+  document.getElementById("nameInputs").style.display = "block";
 });
 
 cancelEndGameBtn.addEventListener("click", () => {
@@ -108,16 +111,19 @@ cancelEndGameBtn.addEventListener("click", () => {
 nextPlayerContinueBtn.addEventListener("click", () => {
   nextPlayerPopup.classList.add("hidden");
   currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-  hitCountThisTurn = 0;
+  dartsThrown = 0;
+  turnHistory = [];
+  selectedMultiplier = 1;
+  updateMultiplierUI();
   updateControlsState(false);
   updateScoreboard();
+  updateTurnDisplay();
 });
 
 closeWinnerPopupBtn.addEventListener("click", () => {
   winnerPopup.classList.add("hidden");
   resetGame();
-  const nameIn = document.getElementById("nameInputs");
-  nameIn.style.display = "block";
+  document.getElementById("nameInputs").style.display = "block";
 });
 
 function startGame() {
@@ -126,58 +132,234 @@ function startGame() {
   currentTurnDisplay.classList.remove("hidden");
   endGameBtn.classList.remove("hidden");
 
+  selectedMultiplier = 1;
   updateScoreboard();
   renderNumberButtons();
+  renderMultiplierButtons();
   updateControlsState(false);
+  updateTurnDisplay();
+}
+
+function getNumberLabel(number) {
+  return number === "B" ? "Bull" : number;
+}
+
+function getPointValue(number, multiplier) {
+  if (number === "B") {
+    return multiplier === 1 ? 25 : 50;
+  }
+  return number * multiplier;
 }
 
 function renderNumberButtons() {
   numberButtons.innerHTML = "";
   validNumbers.forEach((number) => {
     const btn = document.createElement("button");
-    btn.textContent = number === 25 ? "Bull" : number;
+    btn.textContent = getNumberLabel(number);
     btn.addEventListener("click", () => markHit(number));
     numberButtons.appendChild(btn);
   });
+
+  // Miss button
+  const missBtn = document.createElement("button");
+  missBtn.textContent = "Miss";
+  missBtn.className = "miss-btn";
+  missBtn.addEventListener("click", () => recordMiss());
+  numberButtons.appendChild(missBtn);
+}
+
+function renderMultiplierButtons() {
+  multiplierButtons.innerHTML = "";
+
+  const multipliers = [
+    { label: "Single", value: 1 },
+    { label: "Double", value: 2 },
+    { label: "Triple", value: 3 },
+  ];
+
+  multipliers.forEach(({ label, value }) => {
+    const btn = document.createElement("button");
+    btn.textContent = label;
+    btn.dataset.multiplier = value;
+    btn.addEventListener("click", () => {
+      selectedMultiplier = value;
+      updateMultiplierUI();
+    });
+    multiplierButtons.appendChild(btn);
+  });
+
+  // Undo button
+  const undoBtn = document.createElement("button");
+  undoBtn.textContent = "Undo";
+  undoBtn.id = "undoBtn";
+  undoBtn.className = "undo-btn";
+  undoBtn.addEventListener("click", () => undoLastDart());
+  multiplierButtons.appendChild(undoBtn);
+
+  updateMultiplierUI();
+}
+
+function updateMultiplierUI() {
+  const btns = multiplierButtons.querySelectorAll("button[data-multiplier]");
+  btns.forEach((btn) => {
+    btn.classList.toggle(
+      "multiplier-active",
+      parseInt(btn.dataset.multiplier) === selectedMultiplier
+    );
+  });
+}
+
+function recordMiss() {
+  if (dartsThrown >= dartsPerTurn) return;
+
+  turnHistory.push({ number: null, marks: 0, points: 0 });
+  dartsThrown++;
+  updateTurnDisplay();
+  updateScoreboard();
+
+  if (dartsThrown >= dartsPerTurn) {
+    updateControlsState(true);
+    showNextPlayerPopup();
+  }
 }
 
 function markHit(number) {
-  if (hitCountThisTurn >= maxHitsPerTurn) return;
+  if (dartsThrown >= dartsPerTurn) return;
 
   const player = players[currentPlayerIndex];
-  const hits = player.hits[number];
+  const currentHits = player.hits[number];
+  let multiplier = selectedMultiplier;
 
-  if (hits < 3) {
-    player.hits[number]++;
+  // Bull can only be single (outer=25) or double (inner=50), no triple
+  if (number === "B" && multiplier === 3) {
+    multiplier = 2;
+    selectedMultiplier = 2;
+    updateMultiplierUI();
+  }
+
+  let marksAdded = 0;
+  let pointsAdded = 0;
+
+  if (currentHits < 3) {
+    const marksNeeded = 3 - currentHits;
+    const marksToClose = Math.min(multiplier, marksNeeded);
+    const overflowMarks = multiplier - marksToClose;
+
+    player.hits[number] = currentHits + marksToClose;
+    marksAdded = marksToClose;
+
+    // Overflow marks score points if not closed by everyone
+    if (overflowMarks > 0) {
+      const closedByAll = players.every(
+        (p, i) => i === currentPlayerIndex || p.hits[number] >= 3
+      );
+      if (!closedByAll) {
+        const pointValue =
+          number === "B" ? 25 : number;
+        pointsAdded = overflowMarks * pointValue;
+        player.score += pointsAdded;
+      }
+    }
   } else {
-    const closedByOthers = players.every((p) => p.hits[number] >= 3);
-    if (!closedByOthers) {
-      player.score += number;
+    // Already closed by this player - score points if others haven't closed
+    const closedByAll = players.every(
+      (p, i) => i === currentPlayerIndex || p.hits[number] >= 3
+    );
+    if (!closedByAll) {
+      const pointValue =
+        number === "B" ? 25 : number;
+      pointsAdded = multiplier * pointValue;
+      player.score += pointsAdded;
     }
   }
 
-  hitCountThisTurn++;
+  turnHistory.push({ number, marks: marksAdded, points: pointsAdded, multiplier });
+  dartsThrown++;
   updateScoreboard();
+  updateTurnDisplay();
 
   if (checkForWinner()) {
     updateControlsState(true);
     return;
   }
 
-  if (hitCountThisTurn >= maxHitsPerTurn) {
+  if (dartsThrown >= dartsPerTurn) {
     updateControlsState(true);
-    nextPlayerPopup.classList.remove("hidden");
+    showNextPlayerPopup();
   }
+}
+
+function undoLastDart() {
+  if (turnHistory.length === 0) return;
+
+  const last = turnHistory.pop();
+  dartsThrown--;
+
+  if (last.number !== null) {
+    const player = players[currentPlayerIndex];
+    player.score -= last.points;
+    player.hits[last.number] -= last.marks;
+  }
+
+  updateScoreboard();
+  updateTurnDisplay();
+  updateControlsState(false);
+
+  // Hide next player popup if it was showing
+  nextPlayerPopup.classList.add("hidden");
+}
+
+function showNextPlayerPopup() {
+  const nextIndex = (currentPlayerIndex + 1) % players.length;
+  nextPlayerMessage.textContent = `Pass to ${players[nextIndex].name}`;
+  nextPlayerPopup.classList.remove("hidden");
+}
+
+function updateTurnDisplay() {
+  const player = players[currentPlayerIndex];
+  const remaining = dartsPerTurn - dartsThrown;
+  currentTurnDisplay.innerHTML = `<strong>${player.name}</strong> — ${remaining} dart${remaining !== 1 ? "s" : ""} remaining`;
+}
+
+function getHitDisplay(hits) {
+  if (hits === 0) return "";
+  if (hits === 1) return "/";
+  if (hits === 2) return "X";
+  return "Ø";
 }
 
 function updateScoreboard() {
   scoreboard.innerHTML = "";
 
+  // Number labels column
+  const labelsCol = document.createElement("div");
+  labelsCol.className = "score-labels";
+
+  const labelHeader = document.createElement("div");
+  labelHeader.className = "label-header";
+  labelHeader.textContent = "";
+  labelsCol.appendChild(labelHeader);
+
+  const labelsGrid = document.createElement("div");
+  labelsGrid.className = "label-markers";
+  validNumbers.forEach((number) => {
+    const cell = document.createElement("div");
+    cell.className = "label-cell";
+    cell.textContent = getNumberLabel(number);
+    labelsGrid.appendChild(cell);
+  });
+  labelsCol.appendChild(labelsGrid);
+
+  const labelFooter = document.createElement("div");
+  labelFooter.className = "label-header";
+  labelFooter.textContent = "";
+  labelsCol.appendChild(labelFooter);
+  scoreboard.appendChild(labelsCol);
+
   players.forEach((player, index) => {
     const col = document.createElement("div");
     col.className = "score-column";
 
-    // Add highlight class if this is the current player
     if (index === currentPlayerIndex) {
       col.classList.add("current-player");
     }
@@ -193,7 +375,7 @@ function updateScoreboard() {
       const cell = document.createElement("div");
       cell.className = "hit-cell";
       const hits = player.hits[number];
-      cell.textContent = hits === 3 ? "X" : hits > 3 ? "X+" : hits;
+      cell.textContent = getHitDisplay(hits);
       if (hits >= 3) {
         cell.classList.add("closed");
       }
@@ -201,8 +383,8 @@ function updateScoreboard() {
     });
 
     const scoreDisplay = document.createElement("div");
-    scoreDisplay.style.marginTop = "1rem";
-    scoreDisplay.innerHTML = `<strong>Score: ${player.score}</strong>`;
+    scoreDisplay.className = "score-display";
+    scoreDisplay.innerHTML = `<strong>${player.score}</strong>`;
 
     col.appendChild(hitsGrid);
     col.appendChild(scoreDisplay);
@@ -214,12 +396,18 @@ function updateControlsState(disableHits) {
   Array.from(numberButtons.children).forEach((btn) => {
     btn.disabled = disableHits;
   });
+  const btns = multiplierButtons.querySelectorAll("button[data-multiplier]");
+  btns.forEach((btn) => {
+    btn.disabled = disableHits;
+  });
 }
 
 function resetGame() {
   players = [];
   currentPlayerIndex = 0;
-  hitCountThisTurn = 0;
+  dartsThrown = 0;
+  turnHistory = [];
+  selectedMultiplier = 1;
 
   scoreboard.classList.add("hidden");
   controls.classList.add("hidden");
@@ -230,6 +418,7 @@ function resetGame() {
   endGameBtn.classList.add("hidden");
 
   numberButtons.innerHTML = "";
+  multiplierButtons.innerHTML = "";
   currentTurnDisplay.textContent = "";
 
   startGameBtn.style.display = "inline-block";
@@ -260,8 +449,7 @@ function checkForWinner() {
 }
 
 function showWinnerPopup(name) {
-  winnerNameDisplay.textContent = `${name} wins the game! 🎉`;
-
+  winnerNameDisplay.textContent = `${name} wins the game!`;
   winnerPopup.classList.remove("hidden");
 }
 
